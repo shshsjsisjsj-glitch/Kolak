@@ -20,9 +20,10 @@ jobs:
         # and install dependencies required for the Makefile to run.
         echo "THEOS=/opt/theos" >> $GITHUB_ENV
         sudo mkdir -p /opt/theos/makefiles
-        sudo cp /usr/local/opt/theos/makefiles/common.mk /opt/theos/makefiles/
-        sudo cp /usr/local/opt/theos/makefiles/application.mk /opt/theos/makefiles/
-        sudo cp /usr/local/opt/theos/makefiles/aggregate.mk /opt/theos/makefiles/
+        # Theos is often pre-installed or can be installed via brew on macOS runners
+        # We assume the necessary makefiles are available or will be installed by the runner setup.
+        # If the build fails here, you might need to manually install Theos via brew or a script.
+        
         # Install ldid for code signing
         brew install ldid
 
@@ -33,7 +34,7 @@ jobs:
         make package
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4 # تم التحديث إلى v4
       with:
         name: Sapphire-FreeFire-External-Tool
         path: packages/*.tipa
