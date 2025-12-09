@@ -1,0 +1,39 @@
+name: Build External Tool
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest # نستخدم macOS لأنها البيئة الأقرب لتطوير iOS
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install Theos (Mock Setup)
+      run: |
+        # Theos installation is complex, we will mock the necessary environment variables
+        # and install dependencies required for the Makefile to run.
+        echo "THEOS=/opt/theos" >> $GITHUB_ENV
+        sudo mkdir -p /opt/theos/makefiles
+        sudo cp /usr/local/opt/theos/makefiles/common.mk /opt/theos/makefiles/
+        sudo cp /usr/local/opt/theos/makefiles/application.mk /opt/theos/makefiles/
+        sudo cp /usr/local/opt/theos/makefiles/aggregate.mk /opt/theos/makefiles/
+        # Install ldid for code signing
+        brew install ldid
+
+    - name: Build and Package
+      run: |
+        # The 'make package' command will run the build process
+        # and create the .tipa file in the 'packages' directory.
+        make package
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Sapphire-FreeFire-External-Tool
+        path: packages/*.tipa
