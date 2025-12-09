@@ -8,33 +8,28 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest # نستخدم macOS لأنها البيئة الأقرب لتطوير iOS
+    runs-on: macos-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install Theos (Mock Setup)
+    - name: Install Theos
       run: |
-        # Theos installation is complex, we will mock the necessary environment variables
-        # and install dependencies required for the Makefile to run.
-        echo "THEOS=/opt/theos" >> $GITHUB_ENV
-        sudo mkdir -p /opt/theos/makefiles
-        # Theos is often pre-installed or can be installed via brew on macOS runners
-        # We assume the necessary makefiles are available or will be installed by the runner setup.
-        # If the build fails here, you might need to manually install Theos via brew or a script.
-        
+        # Install Theos using the standard method for macOS runners
+        brew install theos
+        # Set the THEOS environment variable to the installation path
+        echo "THEOS=$(brew --prefix theos)" >> $GITHUB_ENV
         # Install ldid for code signing
         brew install ldid
 
     - name: Build and Package
       run: |
-        # The 'make package' command will run the build process
-        # and create the .tipa file in the 'packages' directory.
+        # The 'make package' command will now use the correctly installed Theos path
         make package
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v4 # تم التحديث إلى v4
+      uses: actions/upload-artifact@v4
       with:
         name: Sapphire-FreeFire-External-Tool
         path: packages/*.tipa
